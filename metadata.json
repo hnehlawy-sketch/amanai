@@ -1,0 +1,7 @@
+{
+  "name": "Aman AI - المساعد الذكي",
+  "description": "مساعد ذكي متطور ومحلي، يدعم تحليل الملفات والتفكير العميق.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

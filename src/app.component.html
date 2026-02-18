@@ -1,0 +1,1017 @@
+<div class="flex flex-col h-[100dvh] overflow-hidden font-['Cairo'] relative transition-colors duration-300" 
+     [dir]="currentLang() === 'ar' ? 'rtl' : 'ltr'"
+     [class.bg-slate-900]="theme() === 'dark'"
+     [class.text-white]="theme() === 'dark'"
+     [class.bg-white]="theme() === 'light'"
+     [class.text-slate-800]="theme() === 'light'">
+  
+  <!-- ================= APP CONTENT (Always Visible) ================= -->
+    
+  <!-- SIDEBAR -->
+  @if (isSidebarOpen()) {
+    <div (click)="toggleSidebar()" class="fixed inset-0 bg-black/40 z-40 sidebar-overlay fade-in"></div>
+  }
+  
+  <aside 
+    class="fixed top-0 bottom-0 w-72 z-50 shadow-2xl sidebar-content flex flex-col transform transition-transform duration-300 ease-in-out"
+    [class.right-0]="currentLang() === 'ar'"
+    [class.left-0]="currentLang() === 'en'"
+    [class.translate-x-0]="isSidebarOpen()"
+    [class.translate-x-full]="!isSidebarOpen() && currentLang() === 'ar'"
+    [class.-translate-x-full]="!isSidebarOpen() && currentLang() === 'en'"
+    [class.bg-[#f0f4f9]]="theme() === 'light'"
+    [class.bg-[#0f172a]]="theme() === 'dark'"
+    [class.text-white]="theme() === 'dark'"
+  >
+    <div class="p-4 flex items-center justify-between">
+      <h2 class="text-sm font-bold opacity-70">{{ t().menu }}</h2>
+      <button (click)="toggleSidebar()" class="p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="px-3 mb-4">
+      <button (click)="createNewChat()" 
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium text-sm"
+        [class.bg-[#dde3ea]]="theme() === 'light'"
+        [class.hover:bg-[#d1dbe4]]="theme() === 'light'"
+        [class.text-slate-700]="theme() === 'light'"
+        [class.bg-slate-800]="theme() === 'dark'"
+        [class.hover:bg-slate-700]="theme() === 'dark'"
+        [class.text-white]="theme() === 'dark'"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span>{{ t().newChat }}</span>
+      </button>
+    </div>
+    
+    <!-- Settings Button -->
+    <div class="px-3 mb-4">
+      <button (click)="openSettings()" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors font-medium text-sm"
+        [class.bg-white/70]="theme() === 'light'"
+        [class.hover:bg-white]="theme() === 'light'"
+        [class.text-slate-700]="theme() === 'light'"
+        [class.bg-slate-800]="theme() === 'dark'"
+        [class.hover:bg-slate-700]="theme() === 'dark'"
+        [class.text-white]="theme() === 'dark'">
+        <div class="flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 opacity-80">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 1 15 0m-7.5-4.5v9m-4.5-4.5h9" />
+          </svg>
+          <span>{{ t().settings }}</span>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 opacity-60">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-3 pb-2 space-y-1">
+      <div class="text-xs font-bold opacity-60 mb-2 px-2">{{ t().recent }}</div>
+      @for (session of sessions(); track session.id) {
+        <div 
+          (click)="loadSession(session.id)"
+          class="group flex items-center justify-between px-3 py-2 rounded-full cursor-pointer transition-colors text-sm"
+          [class.bg-white]="theme() === 'light' && currentSessionId() === session.id"
+          [class.shadow-sm]="theme() === 'light' && currentSessionId() === session.id"
+          [class.hover:bg-white/50]="theme() === 'light' && currentSessionId() !== session.id"
+          [class.bg-slate-800]="theme() === 'dark' && currentSessionId() === session.id"
+          [class.hover:bg-slate-800/50]="theme() === 'dark' && currentSessionId() !== session.id"
+        >
+          <div class="flex items-center gap-2 overflow-hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 flex-shrink-0 opacity-50">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+            </svg>
+            <span class="truncate max-w-[140px] opacity-80">{{ session.title }}</span>
+          </div>
+          <button (click)="deleteSession($event, session.id)" class="p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+            </svg>
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="mt-auto p-4 border-t" [class.border-gray-200]="theme() === 'light'" [class.border-slate-700]="theme() === 'dark'">
+      <button (click)="exportChat()" class="flex items-center gap-3 px-3 py-2 text-sm opacity-70 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition-colors w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          <span>{{ t().export }}</span>
+      </button>
+      <div class="mt-4 text-[10px] opacity-40 text-center">
+        Aman AI &bull; Damascus, SY
+      </div>
+    </div>
+  </aside>
+
+  <!-- HEADER -->
+  <header 
+    class="flex-none px-4 py-3 z-20 sticky top-0 border-b transition-colors"
+    [class.bg-white/95]="theme() === 'light'"
+    [class.bg-slate-900/95]="theme() === 'dark'"
+    [class.backdrop-blur-md]="true"
+    [class.border-transparent]="true"
+  >
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button (click)="toggleSidebar()" class="p-2 -mx-2 opacity-60 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-2 cursor-pointer" (click)="loadSession(currentSessionId())">
+           <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-md">
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-white">
+               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+             </svg>
+           </div>
+           <h1 class="text-xl font-bold tracking-wide">Aman</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 relative">
+        <!-- User Avatar: Initials + Aman Logo Fallback logic -->
+        @if (authService.user(); as user) {
+          <div (click)="showUserMenu.set(!showUserMenu())" class="w-9 h-9 rounded-full border-2 border-white shadow-sm overflow-hidden cursor-pointer relative bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center group">
+             @if (user.photoURL) {
+                <img [src]="user.photoURL" alt="User" class="w-full h-full object-cover">
+             } @else {
+                <div class="text-sm font-bold text-slate-600 dark:text-slate-200 group-hover:opacity-0 transition-opacity absolute">
+                  {{ getUserInitials(user.displayName || '') }}
+                </div>
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-orange-500">
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-white">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                   </svg>
+                </div>
+             }
+          </div>
+        } @else {
+          <button (click)="showAuthModal.set(true)" class="text-sm font-bold text-orange-600 hover:underline">
+            {{ t().loginBtn }}
+          </button>
+        }
+        
+        @if (showUserMenu()) {
+          <div (click)="showUserMenu.set(false)" class="fixed inset-0 z-30"></div>
+          <div class="absolute top-12 w-48 rounded-xl shadow-xl border z-40 py-2 animate-[slideUp_0.1s_ease-out]"
+               [class.right-0]="currentLang() === 'en'"
+               [class.left-0]="currentLang() === 'ar'"
+               [class.origin-top-right]="currentLang() === 'en'"
+               [class.origin-top-left]="currentLang() === 'ar'"
+               [class.bg-white]="theme() === 'light'"
+               [class.border-gray-100]="theme() === 'light'"
+               [class.bg-slate-800]="theme() === 'dark'"
+               [class.border-slate-700]="theme() === 'dark'"
+          >
+            @if (authService.user(); as user) {
+               <div class="px-4 py-2 border-b" [class.border-gray-50]="theme() === 'light'" [class.border-slate-700]="theme() === 'dark'">
+                 <p class="text-xs font-bold truncate">{{ user.displayName || 'User' }}</p>
+                 <p class="text-[10px] opacity-60 truncate">{{ user.email }}</p>
+               </div>
+               <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                 </svg>
+                 {{ t().logout }}
+               </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </header>
+
+  @if (voiceMode()) {
+    <div class="live-overlay">
+      <div class="live-backdrop"></div>
+      <div class="live-panel">
+        <div class="live-header">
+          <div class="live-badge">LIVE</div>
+          <div class="live-title">
+            <div class="live-title-text">{{ t().liveTitle }}</div>
+            <div class="live-title-sub">{{ t().liveSubtitle }}</div>
+          </div>
+        </div>
+
+        <div class="live-center">
+          <div class="live-orb"
+               [class.is-listening]="liveListening()"
+               [class.is-speaking]="voiceSpeaking()"></div>
+
+          <div class="live-wave" [class.is-active]="liveListening() || voiceSpeaking()">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div class="live-status">{{ liveStatusLabel() }}</div>
+
+        <div class="live-transcripts">
+          @if (liveUserPreview()) {
+            <div class="live-transcript user">{{ liveUserPreview() }}</div>
+          }
+          @if (liveModelPreview()) {
+            <div class="live-transcript model">{{ liveModelPreview() }}</div>
+          }
+        </div>
+
+        <div class="live-controls">
+          <button class="live-control-btn"
+                  [class.live-control-muted]="liveMuted()"
+                  (click)="toggleLiveMute()">
+            @if (liveMuted()) {
+              {{ t().liveUnmute }}
+            } @else {
+              {{ t().liveMute }}
+            }
+          </button>
+
+          <button class="live-control-btn danger" (click)="stopVoiceMode()">
+            {{ t().liveClose }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- CHAT AREA -->
+  <!-- ADDED pb-28 (112px) to prevent content from being hidden behind floating input, reduced from pb-40 -->
+  <main class="flex-1 overflow-y-auto p-4 sm:p-6" 
+        [class.bg-white]="theme() === 'light'" 
+        [class.bg-slate-900]="theme() === 'dark'"
+        [style.paddingBottom.px]="composerHeight() + 16"
+        #scrollContainer>
+    <div class="max-w-3xl mx-auto flex flex-col min-h-full pb-4">
+      
+      @if (messages().length === 0) {
+        <div class="flex-1 flex flex-col items-center justify-center text-center opacity-100 animate-slide-up py-10">
+           <div class="w-20 h-20 mb-6 rounded-3xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30 relative">
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-white">
+               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+             </svg>
+           </div>
+
+           <h2 class="text-3xl font-medium text-transparent bg-clip-text bg-gradient-to-l from-orange-500 to-amber-700 mb-2">{{ t().greeting }}</h2>
+           <h2 class="text-3xl font-medium opacity-50 mb-8">{{ t().greetingSub }}</h2>
+           
+           <!-- Quick Actions -->
+           <div class="flex flex-wrap justify-center gap-3 max-w-sm">
+             <button (click)="inputMessage.set(t().actionFile); triggerFileUpload()" 
+               class="px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full sm:w-auto"
+               [class.bg-blue-50]="theme() === 'light'"
+               [class.hover:bg-blue-100]="theme() === 'light'"
+               [class.text-blue-700]="theme() === 'light'"
+               [class.bg-blue-900/20]="theme() === 'dark'"
+               [class.hover:bg-blue-900/40]="theme() === 'dark'"
+               [class.text-blue-300]="theme() === 'dark'"
+             >
+               {{ t().actionFile }}
+             </button>
+           </div>
+        </div>
+      }
+
+      @for (msg of messages(); track $index) {
+        <app-message-bubble [message]="msg"></app-message-bubble>
+      }
+
+      @if (isLoading()) {
+        <div class="flex w-full mb-4" [class.justify-start]="currentLang() === 'en'" [class.justify-end]="currentLang() === 'ar'">
+          <div class="rounded-2xl px-4 py-3 border shadow-sm"
+               [class.bg-gray-50]="theme() === 'light'"
+               [class.border-gray-100]="theme() === 'light'"
+               [class.bg-slate-800]="theme() === 'dark'"
+               [class.border-slate-700]="theme() === 'dark'"
+          >
+             <div class="flex items-center gap-1.5">
+               <span class="text-xs opacity-50 mx-1">{{ t().processing }}</span>
+               <div class="w-1.5 h-1.5 bg-orange-400 rounded-full typing-dot"></div>
+               <div class="w-1.5 h-1.5 bg-orange-400 rounded-full typing-dot"></div>
+               <div class="w-1.5 h-1.5 bg-orange-400 rounded-full typing-dot"></div>
+             </div>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+
+  <!-- INPUT AREA (FLOATING) -->
+  <footer #composer class="fixed bottom-0 left-0 right-0 z-30 transition-all duration-300 ease-in-out" 
+          [class.translate-y-[120%]]="isSidebarOpen()"
+          [class.bg-white]="theme() === 'light'"
+          [class.bg-slate-900]="theme() === 'dark'"
+          [class.border-t]="true"
+          [class.border-gray-200]="theme() === 'light'"
+          [class.border-slate-800]="theme() === 'dark'"
+          [class.shadow-[0_-8px_24px_rgba(0,0,0,0.08)]]="theme() === 'light'"
+          [class.shadow-[0_-8px_24px_rgba(0,0,0,0.25)]]="theme() === 'dark'">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+      
+      @if (selectedFile(); as file) {
+        <div class="mx-2 mb-2 border rounded-xl p-3 flex items-center gap-3 shadow-lg w-fit animate-slide-up relative z-40"
+             [class.bg-white]="theme() === 'light'"
+             [class.border-gray-200]="theme() === 'light'"
+             [class.bg-slate-800]="theme() === 'dark'"
+             [class.border-slate-700]="theme() === 'dark'"
+        >
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-orange-600 bg-orange-50 dark:bg-orange-900/30">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-sm font-bold truncate max-w-[120px]">{{file.name}}</span>
+            <span class="text-[10px] opacity-60 uppercase">{{file.mimeType}}</span>
+          </div>
+          <button (click)="clearFile()" class="p-1 rounded-full hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/50 bg-gray-100 dark:bg-slate-700">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      }
+
+      <div class="rounded-2xl p-2 transition-all duration-200 focus-within:shadow-2xl shadow-lg border"
+           [class.border-gray-200]="theme() === 'light'"
+           [class.bg-white]="theme() === 'light'"
+           [class.border-slate-700]="theme() === 'dark'"
+           [class.bg-slate-800]="theme() === 'dark'"
+      >
+        
+        <textarea
+          #textarea
+          [value]="inputMessage()"
+          (input)="updateInput($event)"
+          (keydown)="handleKeydown($event)"
+          rows="1"
+          [placeholder]="isListening() ? t().listening : t().placeholder"
+          class="w-full bg-transparent placeholder-slate-500 dark:placeholder-slate-400 px-4 py-3 rounded-2xl focus:outline-none resize-none overflow-hidden min-h-[50px] leading-6 text-base"
+          [class.text-slate-800]="theme() === 'light'"
+          [class.text-white]="theme() === 'dark'"
+        ></textarea>
+
+        <div class="flex justify-between items-center px-2 pb-1">
+          <div class="flex items-center gap-2">
+             <div class="live-model-wrap">
+               <div class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 shadow-sm relative"
+                    [class.bg-white/50]="theme() === 'light'"
+                    [class.text-slate-500]="theme() === 'light'"
+                    [class.bg-slate-700/50]="theme() === 'dark'"
+                    [class.text-slate-300]="theme() === 'dark'">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 opacity-60">
+                    <path fill-rule="evenodd" d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z" clip-rule="evenodd" />
+                  </svg>
+                 <button (click)="showModelMenu.set(!showModelMenu())" class="text-left">
+                   {{ currentModelLabel() }}
+                 </button>
+
+                 @if (showModelMenu()) {
+                   <div class="absolute bottom-full mb-2 right-0 w-40 rounded-xl shadow-xl border bg-white dark:bg-slate-800 dark:border-slate-700 p-2 z-40">
+                     <button (click)="setModel('fast')" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-orange-50 dark:hover:bg-slate-700">
+                       {{ t().engineFast }}
+                     </button>
+                     <button (click)="setModel('core')" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-orange-50 dark:hover:bg-slate-700">
+                       {{ t().engineCore }}
+                     </button>
+                     <button (click)="setModel('pro')" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-orange-50 dark:hover:bg-slate-700">
+                       {{ t().enginePro }}
+                     </button>
+                   </div>
+                   <div class="fixed inset-0 z-30" (click)="showModelMenu.set(false)"></div>
+                 }
+               </div>
+
+               <button (click)="toggleVoiceMode()"
+                       class="live-inline-btn"
+                       [class.live-inline-active]="voiceMode()"
+                       [class.live-inline-pulse]="liveListening()"
+                       [title]="voiceMode() ? t().liveClose : t().liveTitle">
+                 <span class="live-inline-ring"></span>
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-3.5 h-3.5">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+                 </svg>
+               </button>
+             </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-2">
+             <!-- Voice Input (STT) -->
+             <button (click)="startVoiceInput()"
+                     class="p-2.5 rounded-full transition-colors"
+                     [class.bg-red-100]="isListening()"
+                     [class.text-red-600]="isListening()"
+                     [class.text-slate-500]="!isListening()"
+                     [class.animate-pulse]="isListening()">
+               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+               </svg>
+             </button>
+
+            <button 
+              (click)="triggerFileUpload()"
+              class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+              [class.text-slate-600]="theme() === 'light'"
+              [class.text-slate-300]="theme() === 'dark'"
+              [title]="t().upload"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </button>
+            <input #fileInput type="file" (change)="onFileSelected($event)" class="hidden" accept=".pdf,.csv,.txt,.jpg,.jpeg,.png,.webp" />
+
+            @if (isLoading()) {
+              <!-- STOP BUTTON -->
+              <button 
+                (click)="stopGeneration()"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-400 dark:hover:bg-red-900/80 transition-all duration-200"
+                [title]="t().stop"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                  <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            } @else {
+              <!-- SEND BUTTON -->
+              <button 
+                (click)="sendMessage()"
+                [disabled]="!inputMessage() && !selectedFile()"
+                class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                [class.bg-slate-200]="theme() === 'light' && !inputMessage() && !selectedFile()"
+                [class.text-slate-400]="theme() === 'light' && !inputMessage() && !selectedFile()"
+                [class.bg-slate-900]="theme() === 'light' && (inputMessage() || selectedFile())"
+                [class.text-white]="theme() === 'light' && (inputMessage() || selectedFile())"
+                [class.bg-slate-700]="theme() === 'dark' && !inputMessage() && !selectedFile()"
+                [class.text-slate-500]="theme() === 'dark' && !inputMessage() && !selectedFile()"
+                [class.bg-white]="theme() === 'dark' && (inputMessage() || selectedFile())"
+                [class.text-slate-900]="theme() === 'dark' && (inputMessage() || selectedFile())"
+              >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 transform rotate-180" [class.rotate-0]="currentLang() === 'en'" [class.rotate-180]="currentLang() === 'ar'">
+                    <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+                  </svg>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-3 hidden sm:block">
+         <p class="text-[10px] opacity-40">{{ t().disclaimer }}</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= SETTINGS MODAL ================= -->
+  @if (showSettingsModal()) {
+    <div class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <div (click)="showSettingsModal.set(false)" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-[fadeIn_0.2s_ease-out]"></div>
+      <div class="w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-8 relative z-10 animate-[slideUp_0.3s_cubic-bezier(0.16,1,0.3,1)]"
+           [class.bg-white]="theme() === 'light'"
+           [class.bg-slate-900]="theme() === 'dark'"
+           [class.border]="theme() === 'dark'"
+           [class.border-slate-800]="theme() === 'dark'">
+
+        <button (click)="showSettingsModal.set(false)" class="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors opacity-50 hover:opacity-100">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-md text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold">{{ t().settings }}</h2>
+            <p class="text-xs opacity-60">{{ t().personalization }}</p>
+          </div>
+        </div>
+
+        <div class="max-h-[70vh] overflow-y-auto pr-1">
+          <div class="grid gap-4">
+          <div class="rounded-2xl border p-4"
+               [class.border-gray-200]="theme() === 'light'"
+               [class.bg-white]="theme() === 'light'"
+               [class.border-slate-800]="theme() === 'dark'"
+               [class.bg-slate-800]="theme() === 'dark'">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-bold">{{ t().language }}</div>
+              <div class="flex items-center gap-2">
+                <button (click)="currentLang.set('ar')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors"
+                        [class.bg-slate-900]="currentLang() === 'ar' && theme() === 'light'"
+                        [class.text-white]="currentLang() === 'ar' && theme() === 'light'"
+                        [class.bg-white]="currentLang() === 'ar' && theme() === 'dark'"
+                        [class.text-slate-900]="currentLang() === 'ar' && theme() === 'dark'"
+                        [class.border-transparent]="currentLang() === 'ar'"
+                        [class.border-gray-200]="currentLang() !== 'ar' && theme() === 'light'"
+                        [class.border-slate-700]="currentLang() !== 'ar' && theme() === 'dark'"
+                        [class.text-slate-500]="currentLang() !== 'ar' && theme() === 'light'"
+                        [class.text-slate-300]="currentLang() !== 'ar' && theme() === 'dark'">
+                  AR
+                </button>
+                <button (click)="currentLang.set('en')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors"
+                        [class.bg-slate-900]="currentLang() === 'en' && theme() === 'light'"
+                        [class.text-white]="currentLang() === 'en' && theme() === 'light'"
+                        [class.bg-white]="currentLang() === 'en' && theme() === 'dark'"
+                        [class.text-slate-900]="currentLang() === 'en' && theme() === 'dark'"
+                        [class.border-transparent]="currentLang() === 'en'"
+                        [class.border-gray-200]="currentLang() !== 'en' && theme() === 'light'"
+                        [class.border-slate-700]="currentLang() !== 'en' && theme() === 'dark'"
+                        [class.text-slate-500]="currentLang() !== 'en' && theme() === 'light'"
+                        [class.text-slate-300]="currentLang() !== 'en' && theme() === 'dark'">
+                  EN
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border p-4"
+               [class.border-gray-200]="theme() === 'light'"
+               [class.bg-white]="theme() === 'light'"
+               [class.border-slate-800]="theme() === 'dark'"
+               [class.bg-slate-800]="theme() === 'dark'">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-bold">{{ t().darkMode }}</div>
+              <div class="flex items-center gap-2">
+                <button (click)="setTheme('light')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors"
+                        [class.bg-slate-900]="theme() === 'light'"
+                        [class.text-white]="theme() === 'light'"
+                        [class.border-transparent]="theme() === 'light'"
+                        [class.border-slate-700]="theme() === 'dark'"
+                        [class.text-slate-300]="theme() === 'dark'">
+                  Light
+                </button>
+                <button (click)="setTheme('dark')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors"
+                        [class.bg-white]="theme() === 'dark'"
+                        [class.text-slate-900]="theme() === 'dark'"
+                        [class.border-transparent]="theme() === 'dark'"
+                        [class.border-gray-200]="theme() === 'light'"
+                        [class.text-slate-500]="theme() === 'light'">
+                  Dark
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border p-4"
+               [class.border-gray-200]="theme() === 'light'"
+               [class.bg-white]="theme() === 'light'"
+               [class.border-slate-800]="theme() === 'dark'"
+               [class.bg-slate-800]="theme() === 'dark'">
+            <div class="text-sm font-bold mb-2">{{ t().engine }}</div>
+            <div class="flex flex-wrap gap-2">
+              <button (click)="setModel('fast')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors"
+                      [class.bg-slate-900]="modelKey() === 'fast' && theme() === 'light'"
+                      [class.text-white]="modelKey() === 'fast' && theme() === 'light'"
+                      [class.bg-white]="modelKey() === 'fast' && theme() === 'dark'"
+                      [class.text-slate-900]="modelKey() === 'fast' && theme() === 'dark'"
+                      [class.border-transparent]="modelKey() === 'fast'"
+                      [class.border-gray-200]="modelKey() !== 'fast' && theme() === 'light'"
+                      [class.border-slate-700]="modelKey() !== 'fast' && theme() === 'dark'"
+                      [class.text-slate-500]="modelKey() !== 'fast' && theme() === 'light'"
+                      [class.text-slate-300]="modelKey() !== 'fast' && theme() === 'dark'">
+                {{ t().engineFast }}
+              </button>
+              <button (click)="setModel('core')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors"
+                      [class.bg-slate-900]="modelKey() === 'core' && theme() === 'light'"
+                      [class.text-white]="modelKey() === 'core' && theme() === 'light'"
+                      [class.bg-white]="modelKey() === 'core' && theme() === 'dark'"
+                      [class.text-slate-900]="modelKey() === 'core' && theme() === 'dark'"
+                      [class.border-transparent]="modelKey() === 'core'"
+                      [class.border-gray-200]="modelKey() !== 'core' && theme() === 'light'"
+                      [class.border-slate-700]="modelKey() !== 'core' && theme() === 'dark'"
+                      [class.text-slate-500]="modelKey() !== 'core' && theme() === 'light'"
+                      [class.text-slate-300]="modelKey() !== 'core' && theme() === 'dark'">
+                {{ t().engineCore }}
+              </button>
+              <button (click)="setModel('pro')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors"
+                      [class.bg-slate-900]="modelKey() === 'pro' && theme() === 'light'"
+                      [class.text-white]="modelKey() === 'pro' && theme() === 'light'"
+                      [class.bg-white]="modelKey() === 'pro' && theme() === 'dark'"
+                      [class.text-slate-900]="modelKey() === 'pro' && theme() === 'dark'"
+                      [class.border-transparent]="modelKey() === 'pro'"
+                      [class.border-gray-200]="modelKey() !== 'pro' && theme() === 'light'"
+                      [class.border-slate-700]="modelKey() !== 'pro' && theme() === 'dark'"
+                      [class.text-slate-500]="modelKey() !== 'pro' && theme() === 'light'"
+                      [class.text-slate-300]="modelKey() !== 'pro' && theme() === 'dark'">
+                {{ t().enginePro }}
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border p-4"
+               [class.border-gray-200]="theme() === 'light'"
+               [class.bg-white]="theme() === 'light'"
+               [class.border-slate-800]="theme() === 'dark'"
+               [class.bg-slate-800]="theme() === 'dark'">
+            <div class="text-sm font-bold mb-2">{{ t().responseStyle }}</div>
+            <div class="flex flex-wrap gap-2">
+              <button (click)="setResponseStyle('smooth')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors"
+                      [class.bg-slate-900]="responseStyle() === 'smooth' && theme() === 'light'"
+                      [class.text-white]="responseStyle() === 'smooth' && theme() === 'light'"
+                      [class.bg-white]="responseStyle() === 'smooth' && theme() === 'dark'"
+                      [class.text-slate-900]="responseStyle() === 'smooth' && theme() === 'dark'"
+                      [class.border-transparent]="responseStyle() === 'smooth'"
+                      [class.border-gray-200]="responseStyle() !== 'smooth' && theme() === 'light'"
+                      [class.border-slate-700]="responseStyle() !== 'smooth' && theme() === 'dark'"
+                      [class.text-slate-500]="responseStyle() !== 'smooth' && theme() === 'light'"
+                      [class.text-slate-300]="responseStyle() !== 'smooth' && theme() === 'dark'">
+                {{ t().responseSmooth }}
+              </button>
+              <button (click)="setResponseStyle('instant')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors"
+                      [class.bg-slate-900]="responseStyle() === 'instant' && theme() === 'light'"
+                      [class.text-white]="responseStyle() === 'instant' && theme() === 'light'"
+                      [class.bg-white]="responseStyle() === 'instant' && theme() === 'dark'"
+                      [class.text-slate-900]="responseStyle() === 'instant' && theme() === 'dark'"
+                      [class.border-transparent]="responseStyle() === 'instant'"
+                      [class.border-gray-200]="responseStyle() !== 'instant' && theme() === 'light'"
+                      [class.border-slate-700]="responseStyle() !== 'instant' && theme() === 'dark'"
+                      [class.text-slate-500]="responseStyle() !== 'instant' && theme() === 'light'"
+                      [class.text-slate-300]="responseStyle() !== 'instant' && theme() === 'dark'">
+                {{ t().responseInstant }}
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border p-4"
+               [class.border-gray-200]="theme() === 'light'"
+               [class.bg-white]="theme() === 'light'"
+               [class.border-slate-800]="theme() === 'dark'"
+               [class.bg-slate-800]="theme() === 'dark'">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-sm font-bold">{{ t().profile }}</div>
+                <p class="text-xs opacity-60 mt-1">{{ t().profileHint }}</p>
+              </div>
+              <button (click)="openProfileModal()" class="px-4 py-2 rounded-xl text-xs font-bold transition-colors border"
+                      [class.bg-slate-900]="theme() === 'light'"
+                      [class.text-white]="theme() === 'light'"
+                      [class.bg-white]="theme() === 'dark'"
+                      [class.text-slate-900]="theme() === 'dark'"
+                      [class.border-transparent]="true">
+                {{ t().profileOpen }}
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border p-4"
+               [class.border-gray-200]="theme() === 'light'"
+               [class.bg-white]="theme() === 'light'"
+               [class.border-slate-800]="theme() === 'dark'"
+               [class.bg-slate-800]="theme() === 'dark'">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-sm font-bold">{{ t().personalization }}</div>
+              <span class="text-xs opacity-60">
+                @if (prefsStatus() === 'saving') { {{ t().saving }} }
+                @else if (prefsStatus() === 'saved') { {{ t().saved }} }
+              </span>
+            </div>
+            <div class="grid gap-3">
+              <div>
+                <label class="text-xs font-bold opacity-60 block mb-1">{{ t().aboutYou }}</label>
+                <textarea [value]="customAbout()" (input)="updateCustomAbout($any($event.target).value)" rows="2"
+                          class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm resize-none"
+                          [class.bg-gray-50]="theme() === 'light'"
+                          [class.border-gray-200]="theme() === 'light'"
+                          [class.bg-slate-800]="theme() === 'dark'"
+                          [class.border-slate-700]="theme() === 'dark'"
+                          [placeholder]="t().aboutYouHint"></textarea>
+              </div>
+              <div>
+                <label class="text-xs font-bold opacity-60 block mb-1">{{ t().responsePref }}</label>
+                <textarea [value]="customStyle()" (input)="updateCustomStyle($any($event.target).value)" rows="2"
+                          class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm resize-none"
+                          [class.bg-gray-50]="theme() === 'light'"
+                          [class.border-gray-200]="theme() === 'light'"
+                          [class.bg-slate-800]="theme() === 'dark'"
+                          [class.border-slate-700]="theme() === 'dark'"
+                          [placeholder]="t().responsePrefHint"></textarea>
+              </div>
+              <div>
+                <label class="text-xs font-bold opacity-60 block mb-1">{{ t().focusPref }}</label>
+                <textarea [value]="customFocus()" (input)="updateCustomFocus($any($event.target).value)" rows="2"
+                          class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm resize-none"
+                          [class.bg-gray-50]="theme() === 'light'"
+                          [class.border-gray-200]="theme() === 'light'"
+                          [class.bg-slate-800]="theme() === 'dark'"
+                          [class.border-slate-700]="theme() === 'dark'"
+                          [placeholder]="t().focusPrefHint"></textarea>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ================= PROFILE MODAL ================= -->
+  @if (showProfileModal()) {
+    <div class="fixed inset-0 z-[75] flex items-center justify-center p-4">
+      <div (click)="showProfileModal.set(false)" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-[fadeIn_0.2s_ease-out]"></div>
+      <div class="w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-8 relative z-10 animate-[slideUp_0.3s_cubic-bezier(0.16,1,0.3,1)]"
+           [class.bg-white]="theme() === 'light'"
+           [class.bg-slate-900]="theme() === 'dark'"
+           [class.border]="theme() === 'dark'"
+           [class.border-slate-800]="theme() === 'dark'">
+
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-md text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold">{{ t().profile }}</h2>
+              <p class="text-xs opacity-60">{{ t().profileHint }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button (click)="backToSettings()" class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors"
+                    [class.bg-white]="theme() === 'light'"
+                    [class.text-slate-700]="theme() === 'light'"
+                    [class.border-gray-200]="theme() === 'light'"
+                    [class.bg-slate-800]="theme() === 'dark'"
+                    [class.text-slate-200]="theme() === 'dark'"
+                    [class.border-slate-700]="theme() === 'dark'">
+              {{ t().backToSettings }}
+            </button>
+            <button (click)="showProfileModal.set(false)" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors opacity-60 hover:opacity-100">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs opacity-60">
+            @if (prefsStatus() === 'saving') { {{ t().saving }} }
+            @else if (prefsStatus() === 'saved') { {{ t().saved }} }
+          </span>
+        </div>
+
+        <div class="max-h-[70vh] overflow-y-auto pr-1">
+          <div class="rounded-2xl border p-4"
+               [class.border-gray-200]="theme() === 'light'"
+               [class.bg-white]="theme() === 'light'"
+               [class.border-slate-800]="theme() === 'dark'"
+               [class.bg-slate-800]="theme() === 'dark'">
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label class="text-xs font-bold opacity-60 block mb-1">{{ t().fullName }}</label>
+                <input [value]="profileName()" (input)="updateProfileName($any($event.target).value)" type="text"
+                       class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm"
+                       [class.bg-gray-50]="theme() === 'light'"
+                       [class.border-gray-200]="theme() === 'light'"
+                       [class.bg-slate-800]="theme() === 'dark'"
+                       [class.border-slate-700]="theme() === 'dark'"
+                       [placeholder]="t().fullNameHint">
+              </div>
+              <div>
+                <label class="text-xs font-bold opacity-60 block mb-1">{{ t().birthDate }}</label>
+                <input [value]="profileBirthdate()" (input)="updateProfileBirthdate($any($event.target).value)" type="date"
+                       class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm"
+                       [class.bg-gray-50]="theme() === 'light'"
+                       [class.border-gray-200]="theme() === 'light'"
+                       [class.bg-slate-800]="theme() === 'dark'"
+                       [class.border-slate-700]="theme() === 'dark'">
+              </div>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2 mt-3">
+              <div>
+                <label class="text-xs font-bold opacity-60 block mb-1">{{ t().location }}</label>
+                <input [value]="profileLocation()" (input)="updateProfileLocation($any($event.target).value)" type="text"
+                       class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm"
+                       [class.bg-gray-50]="theme() === 'light'"
+                       [class.border-gray-200]="theme() === 'light'"
+                       [class.bg-slate-800]="theme() === 'dark'"
+                       [class.border-slate-700]="theme() === 'dark'"
+                       [placeholder]="t().locationHint">
+              </div>
+              <div>
+                <label class="text-xs font-bold opacity-60 block mb-1">{{ t().role }}</label>
+                <input [value]="profileRole()" (input)="updateProfileRole($any($event.target).value)" type="text"
+                       class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm"
+                       [class.bg-gray-50]="theme() === 'light'"
+                       [class.border-gray-200]="theme() === 'light'"
+                       [class.bg-slate-800]="theme() === 'dark'"
+                       [class.border-slate-700]="theme() === 'dark'"
+                       [placeholder]="t().roleHint">
+              </div>
+            </div>
+            <div class="mt-3">
+              <label class="text-xs font-bold opacity-60 block mb-1">{{ t().interests }}</label>
+              <textarea [value]="profileInterests()" (input)="updateProfileInterests($any($event.target).value)" rows="2"
+                        class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm resize-none"
+                        [class.bg-gray-50]="theme() === 'light'"
+                        [class.border-gray-200]="theme() === 'light'"
+                        [class.bg-slate-800]="theme() === 'dark'"
+                        [class.border-slate-700]="theme() === 'dark'"
+                        [placeholder]="t().interestsHint"></textarea>
+            </div>
+            <div class="mt-3">
+              <label class="text-xs font-bold opacity-60 block mb-1">{{ t().notes }}</label>
+              <textarea [value]="profileNotes()" (input)="updateProfileNotes($any($event.target).value)" rows="2"
+                        class="w-full px-3 py-2 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm resize-none"
+                        [class.bg-gray-50]="theme() === 'light'"
+                        [class.border-gray-200]="theme() === 'light'"
+                        [class.bg-slate-800]="theme() === 'dark'"
+                        [class.border-slate-700]="theme() === 'dark'"
+                        [placeholder]="t().notesHint"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ================= INSTALL PROMPT MODAL ================= -->
+  @if (showInstallPrompt()) {
+    <div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
+      <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-gray-100 dark:border-slate-700 relative animate-slide-up">
+         <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg mb-4 text-white">
+               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+               </svg>
+            </div>
+            <h3 class="text-xl font-bold mb-2 dark:text-white">{{ t().installApp }}</h3>
+            <p class="text-sm opacity-70 mb-6 dark:text-gray-300 leading-relaxed">{{ t().installDesc }}</p>
+            
+            <button (click)="installPwa()" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-gray-100 text-white rounded-xl font-bold mb-3 transition-colors shadow-lg shadow-slate-900/10 dark:shadow-white/5">
+              {{ t().install }}
+            </button>
+            <button (click)="dismissInstall()" class="w-full py-2.5 text-sm font-bold opacity-50 hover:opacity-100 dark:text-white transition-opacity">
+              {{ t().later }}
+            </button>
+         </div>
+      </div>
+    </div>
+  }
+
+  <!-- ================= AUTH MODAL ================= -->
+  @if (showAuthModal()) {
+    <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+       <!-- Backdrop -->
+       <div (click)="showAuthModal.set(false)" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-[fadeIn_0.2s_ease-out]"></div>
+       
+       <!-- Modal Content -->
+       <div class="w-full max-w-md rounded-3xl shadow-2xl p-8 relative z-10 animate-[slideUp_0.3s_cubic-bezier(0.16,1,0.3,1)]"
+            [class.bg-white]="theme() === 'light'"
+            [class.bg-slate-900]="theme() === 'dark'"
+            [class.border]="theme() === 'dark'"
+            [class.border-slate-800]="theme() === 'dark'">
+         
+         <button (click)="showAuthModal.set(false)" class="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors opacity-50 hover:opacity-100">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+           </svg>
+         </button>
+
+         <!-- Logo -->
+         <div class="flex flex-col items-center mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7 text-white">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+              </svg>
+            </div>
+            <h1 class="text-xl font-bold">{{ authMode() === 'login' ? t().loginTitle : t().signupTitle }}</h1>
+            <p class="text-sm mt-1 opacity-60 text-center px-4">{{ t().mustLogin }}</p>
+         </div>
+
+         <!-- Error Message -->
+         @if (authError()) {
+           <div class="mb-4 p-3 rounded-xl text-xs flex items-center gap-2 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300 border border-red-100 dark:border-red-800">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+               <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
+             </svg>
+             {{ authError() }}
+           </div>
+         }
+
+         <!-- Form -->
+         <div class="space-y-3">
+            @if (authMode() === 'signup') {
+              <div>
+                <input 
+                  [value]="authName()" 
+                  (input)="authName.set($any($event.target).value)" 
+                  type="text" 
+                  class="w-full px-4 py-3 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm"
+                  [class.bg-gray-50]="theme() === 'light'"
+                  [class.border-gray-200]="theme() === 'light'"
+                  [class.bg-slate-800]="theme() === 'dark'"
+                  [class.border-slate-700]="theme() === 'dark'"
+                  [placeholder]="t().name"
+                >
+              </div>
+            }
+
+            <div>
+              <input 
+                [value]="authEmail()" 
+                (input)="authEmail.set($any($event.target).value)" 
+                type="email" 
+                class="w-full px-4 py-3 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm text-left"
+                [class.bg-gray-50]="theme() === 'light'"
+                [class.border-gray-200]="theme() === 'light'"
+                [class.bg-slate-800]="theme() === 'dark'"
+                [class.border-slate-700]="theme() === 'dark'"
+                [placeholder]="t().email"
+                dir="ltr"
+              >
+            </div>
+
+            <div>
+              <input 
+                [value]="authPass()" 
+                (input)="authPass.set($any($event.target).value)" 
+                type="password" 
+                class="w-full px-4 py-3 rounded-xl border focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition-all text-sm"
+                [class.bg-gray-50]="theme() === 'light'"
+                [class.border-gray-200]="theme() === 'light'"
+                [class.bg-slate-800]="theme() === 'dark'"
+                [class.border-slate-700]="theme() === 'dark'"
+                [placeholder]="t().password"
+              >
+            </div>
+         </div>
+
+         <div class="mt-6 space-y-3">
+           <button 
+             (click)="handleAuth()"
+             [disabled]="authLoading()"
+             class="w-full py-3 rounded-xl font-bold shadow-lg shadow-slate-900/10 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+             [class.bg-slate-900]="theme() === 'light'"
+             [class.text-white]="theme() === 'light'"
+             [class.bg-white]="theme() === 'dark'"
+             [class.text-slate-900]="theme() === 'dark'"
+           >
+             @if (authLoading()) {
+               <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+               </svg>
+             } @else {
+               {{ authMode() === 'login' ? t().loginBtn : t().signupBtn }}
+             }
+           </button>
+
+           <div class="relative flex py-1 items-center">
+               <div class="flex-grow border-t" [class.border-gray-200]="theme() === 'light'" [class.border-slate-700]="theme() === 'dark'"></div>
+               <span class="flex-shrink-0 mx-4 text-xs opacity-50 uppercase font-bold">OR</span>
+               <div class="flex-grow border-t" [class.border-gray-200]="theme() === 'light'" [class.border-slate-700]="theme() === 'dark'"></div>
+           </div>
+
+           <!-- Google Login Button -->
+           <button 
+             (click)="handleGoogleAuth()"
+             [disabled]="authLoading()"
+             class="w-full py-3 rounded-xl font-medium border flex items-center justify-center gap-3 transition-colors disabled:opacity-70"
+             [class.bg-white]="theme() === 'light'"
+             [class.border-gray-200]="theme() === 'light'"
+             [class.hover:bg-gray-50]="theme() === 'light'"
+             [class.text-slate-700]="theme() === 'light'"
+             [class.bg-slate-800]="theme() === 'dark'"
+             [class.border-slate-700]="theme() === 'dark'"
+             [class.hover:bg-slate-700]="theme() === 'dark'"
+             [class.text-white]="theme() === 'dark'"
+           >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              <span>{{ t().googleBtn }}</span>
+           </button>
+         </div>
+
+         <div class="mt-6 text-center text-sm opacity-60">
+           @if (authMode() === 'login') {
+             {{ t().noAccount }} <button (click)="toggleAuthMode()" class="text-orange-600 font-bold hover:underline">{{ t().createOne }}</button>
+           } @else {
+             {{ t().hasAccount }} <button (click)="toggleAuthMode()" class="text-orange-600 font-bold hover:underline">{{ t().signInHere }}</button>
+           }
+         </div>
+       </div>
+    </div>
+  }
+
+</div>
