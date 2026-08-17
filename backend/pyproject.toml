@@ -1,0 +1,14 @@
+[project]
+name = "aman-ai-backend"
+version = "0.1.0"
+description = "AMAN AI multi-provider agent backend"
+requires-python = ">=3.11"
+dependencies = [
+  "openai-agents>=0.2.0",
+  "fastapi>=0.116.0",
+  "uvicorn[standard]>=0.35.0",
+  "pydantic-settings>=2.10.0",
+]
+
+[tool.uv]
+dev-dependencies = []
