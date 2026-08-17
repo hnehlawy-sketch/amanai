@@ -1,7 +1,6 @@
 import os
 
-from agents import Agent, Runner
-from agents.models.multi_provider import MultiProvider
+from agents import Agent, AsyncOpenAI, OpenAIChatCompletionsModel, Runner, set_tracing_disabled
 
 from config import settings
 from providers import get_provider
@@ -25,20 +24,23 @@ def build_model():
     if not key:
         raise RuntimeError(f"Missing credential: {provider.api_key_env}")
 
-    if provider.base_url:
-        return MultiProvider(use_for_tracing=True).get_model(
-            model=f"{provider.name}/default",
-            api_key=key,
-            base_url=provider.base_url,
-        )
-    return MultiProvider().get_model(model="openai/gpt-5.2", api_key=key)
+    model_name = {
+        "openai": settings.openai_model,
+        "gemini": settings.gemini_model,
+        "nvidia": settings.nvidia_model,
+        "openrouter": settings.openrouter_model,
+    }[provider.name]
+
+    if provider.name == "openai":
+        client = AsyncOpenAI(api_key=key)
+        return OpenAIChatCompletionsModel(model=model_name, openai_client=client)
+
+    client = AsyncOpenAI(api_key=key, base_url=provider.base_url)
+    set_tracing_disabled(True)
+    return OpenAIChatCompletionsModel(model=model_name, openai_client=client)
 
 
-agent = Agent(
-    name="AMAN",
-    instructions=SYSTEM_INSTRUCTIONS,
-    model=build_model(),
-)
+agent = Agent(name="AMAN", instructions=SYSTEM_INSTRUCTIONS, model=build_model())
 
 
 async def run_agent(message: str) -> str:
